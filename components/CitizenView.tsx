@@ -43,132 +43,166 @@ const CitizenView: React.FC<CitizenViewProps> = ({ lang, data, selectedDept, set
 
   const t = {
     ES: {
-      mapTitle: "MAPA TERRITORIAL",
-      statsTitle: "MÉTRICAS // " + selectedDept.toUpperCase(),
-      national: "VISTA NACIONAL",
-      processed: "ACTAS PROCESADAS",
-      participation: "PARTICIPACIÓN",
-      status: "ESTADO",
-      critical: "ALERTA",
+      mapTitle: "Mapa Territorial",
+      statsTitle: "Métricas // " + selectedDept.toUpperCase(),
+      national: "Vista Nacional",
+      processed: "Actas Procesadas",
+      participation: "Participación Ciudadana",
+      status: "Estado de Integridad",
+      critical: "ALERTA DETECTADA",
       clean: "VERIFICADO"
     },
     EN: {
-      mapTitle: "TERRITORIAL MAP",
-      statsTitle: "METRICS // " + selectedDept.toUpperCase(),
-      national: "NATIONAL VIEW",
-      processed: "PROCESSED",
-      participation: "PARTICIPATION",
-      status: "STATUS",
-      critical: "ALERT",
+      mapTitle: "Territorial Map",
+      statsTitle: "Metrics // " + selectedDept.toUpperCase(),
+      national: "National View",
+      processed: "Processed Records",
+      participation: "Citizen Participation",
+      status: "Integrity Status",
+      critical: "ALERT DETECTED",
       clean: "VERIFIED"
     }
   }[lang];
 
   return (
-    <div className={`space-y-4 md:space-y-6 ${colorBlindMode ? 'color-blind-active' : ''}`}>
-      {/* CANDIDATOS - GRID DINÁMICO */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 no-print">
+    <div className="space-y-10">
+      {/* CANDIDATOS - GRID MODERNIZADO */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {data?.candidates.map((c) => (
-          <div key={c.id} className="bento-card p-2 md:p-4 flex flex-col justify-between border-t-2" style={{ borderTopColor: colorBlindMode ? 'currentColor' : c.color }}>
-            <div className="flex justify-between items-start mb-1">
-              <span className="mono text-[7px] md:text-[9px] font-black opacity-40">{c.party}</span>
-              <span className="text-[7px] font-bold px-1 bg-zinc-800 text-zinc-400 mono">ID:{c.id.toUpperCase().slice(0,3)}</span>
+          <div key={c.id} className="bento-card p-6 flex flex-col justify-between overflow-hidden relative">
+            <div className="absolute top-0 right-0 p-4 opacity-5">
+              <span className="font-black text-6xl mono">{c.id.toUpperCase().slice(0,2)}</span>
             </div>
-            <div>
-              <h4 className="text-[9px] md:text-[11px] font-black uppercase tracking-tight mb-0.5 truncate">{c.name}</h4>
-              <p className="text-sm md:text-xl font-black tracking-tighter mono">{c.votes.toLocaleString()}</p>
-              <div className="mt-1 h-0.5 md:h-1 w-full bg-zinc-800/30">
-                <div className="h-full transition-all duration-700" style={{ width: `${(c.votes / totalVotes * 100).toFixed(1)}%`, backgroundColor: colorBlindMode ? '#fff' : c.color }}></div>
+            <div className="mb-6">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1 block">{c.party}</span>
+              <h4 className="text-sm font-extrabold uppercase tracking-tight text-slate-100 mb-1">{c.name}</h4>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-black tracking-tighter mono">{c.votes.toLocaleString()}</span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase">votos</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-[10px] font-bold uppercase text-slate-500">
+                <span>Porcentaje</span>
+                <span>{(c.votes / totalVotes * 100).toFixed(1)}%</span>
+              </div>
+              <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                <div 
+                  className="h-full transition-all duration-1000 ease-out rounded-full" 
+                  style={{ 
+                    width: `${(c.votes / totalVotes * 100).toFixed(1)}%`, 
+                    backgroundColor: colorBlindMode ? '#fff' : c.color,
+                    boxShadow: colorBlindMode ? 'none' : `0 0 10px ${c.color}44`
+                  }}
+                ></div>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
-        {/* MAPA GEOGRÁFICO - RESPONSIVO */}
-        <div className="lg:col-span-7 xl:col-span-8 bento-card p-3 md:p-6 flex flex-col min-h-[400px]">
-          <div className="flex justify-between items-center gap-2 mb-4">
-            <h3 className="text-[9px] md:text-[10px] font-black tracking-[0.1em] md:tracking-[0.2em] opacity-50 uppercase">{t.mapTitle}</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* MAPA GEOGRÁFICO */}
+        <div className="lg:col-span-8 bento-card p-6 flex flex-col min-h-[500px]">
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-6 bg-blue-600 rounded-full"></div>
+              <h3 className="text-sm font-extrabold uppercase tracking-[0.2em] text-slate-400">{t.mapTitle}</h3>
+            </div>
             <button 
               onClick={() => setSelectedDept("Nivel Nacional")} 
-              className={`text-[8px] md:text-[9px] font-black px-3 py-1.5 border transition-all ${theme === 'light' ? 'bg-zinc-100 border-zinc-300' : 'bg-zinc-900 border-zinc-800 hover:border-zinc-500 hover:bg-zinc-800'}`}
+              className="text-xs font-bold px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-500 hover:text-white transition-all shadow-lg"
             >
               {t.national}
             </button>
           </div>
 
-          <div className="flex-grow relative flex items-center justify-center bg-black/5 rounded-sm overflow-hidden border border-[var(--card-border)]">
-            <svg viewBox="0 0 800 500" className="w-full h-full object-contain drop-shadow-2xl">
+          <div className="flex-grow relative flex items-center justify-center bg-slate-900/40 rounded-2xl overflow-hidden border border-slate-800">
+            <svg viewBox="0 0 800 500" className="w-full h-full max-h-[450px] object-contain">
               {HONDURAS_PATHS.map((path) => {
                 const dData = data?.departments.find(d => d.name === path.name);
                 const isActive = selectedDept === path.name;
                 
-                let fill = theme === 'dark' ? '#141414' : '#F0F0F0';
-                if (isActive) fill = colorBlindMode ? '#FFF' : '#007BFF';
-                else if (dData?.status === 'critical') fill = colorBlindMode ? '#888' : '#3F0C0C';
+                let fill = theme === 'dark' ? '#0f172a' : '#f1f5f9';
+                if (isActive) fill = colorBlindMode ? '#FFF' : '#3b82f6';
+                else if (dData?.status === 'critical') fill = colorBlindMode ? '#888' : '#450a0a';
 
                 return (
                   <path
                     key={path.id}
                     d={path.d}
                     onClick={() => setSelectedDept(path.name)}
-                    className="cursor-pointer transition-all duration-300 hover:opacity-80 stroke-[0.5] touch-manipulation"
+                    className="cursor-pointer transition-all duration-300 hover:opacity-80 stroke-[0.8] touch-manipulation"
                     style={{ 
                       fill: fill, 
-                      stroke: isActive ? (theme === 'dark' ? '#FFF' : '#000') : (theme === 'dark' ? '#2A2A2A' : '#CCC'),
-                      strokeWidth: isActive ? 2 : 0.8,
+                      stroke: isActive ? (theme === 'dark' ? '#FFF' : '#000') : (theme === 'dark' ? '#1e293b' : '#cbd5e1'),
+                      strokeWidth: isActive ? 2.5 : 1,
+                      filter: isActive ? 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))' : 'none'
                     }}
                   />
                 );
               })}
             </svg>
             
-            <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 mono text-[7px] md:text-[8px] opacity-20 flex flex-col items-center">
-              <span>N</span>
-              <div className="w-px h-4 md:h-6 bg-current my-1"></div>
-              <span>HND_GEO</span>
+            <div className="absolute bottom-6 right-6 mono text-[10px] font-bold text-slate-600 flex flex-col items-center">
+              <span className="mb-2">NORTH</span>
+              <div className="w-px h-10 bg-slate-800"></div>
+              <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse mt-2"></div>
             </div>
           </div>
         </div>
 
-        {/* MÉTRICAS - LAYOUT ADAPTATIVO */}
-        <div className="lg:col-span-5 xl:col-span-4 space-y-4">
-          <div className="bento-card p-4 md:p-6">
-             <h4 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-4 md:mb-6">{t.statsTitle}</h4>
-             <div className="grid grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
-                <div className="col-span-1">
-                  <span className="text-[8px] md:text-[9px] font-bold uppercase block mb-1 opacity-40 mono">{t.processed}</span>
-                  <div className="flex items-baseline gap-1 md:gap-2">
-                    <span className="text-2xl md:text-5xl font-black tracking-tighter mono">
+        {/* MÉTRICAS DEPARTAMENTALES */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bento-card p-8">
+             <h4 className="text-xs font-extrabold uppercase tracking-widest text-slate-500 mb-10">{t.statsTitle}</h4>
+             
+             <div className="space-y-10">
+                <div className="relative">
+                  <span className="text-[10px] font-bold uppercase block mb-2 text-slate-500 tracking-widest mono">{t.processed}</span>
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-6xl font-black tracking-tighter text-slate-100 mono">
                       {currentDept ? currentDept.processed : data?.global.processedPercent}%
                     </span>
-                    <span className={`w-1.5 h-1.5 md:w-2 md:h-2 ${currentDept?.status === 'critical' ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`}></span>
+                    <div className={`w-3 h-3 rounded-full ${currentDept?.status === 'critical' ? 'bg-red-500 animate-pulse' : 'bg-emerald-500'}`}></div>
                   </div>
                 </div>
 
-                <div className="col-span-1">
-                  <span className="text-[8px] md:text-[9px] font-bold uppercase block mb-1 opacity-40 mono">{t.participation}</span>
-                  <span className="text-xl md:text-4xl font-black tracking-tighter mono">
+                <div className="relative">
+                  <span className="text-[10px] font-bold uppercase block mb-2 text-slate-500 tracking-widest mono">{t.participation}</span>
+                  <span className="text-4xl font-black tracking-tighter text-slate-100 mono">
                     {currentDept ? currentDept.participation : data?.global.participationPercent}%
                   </span>
                 </div>
 
-                <div className={`col-span-2 p-3 md:p-4 border ${currentDept?.status === 'critical' ? 'bg-red-950/20 border-red-900/50' : 'bg-zinc-900/10 border-zinc-800'}`}>
-                  <span className="text-[8px] md:text-[9px] font-bold uppercase block mb-1 opacity-40 mono">{t.status}</span>
-                  <span className={`text-[10px] md:text-xs font-black uppercase ${currentDept?.status === 'critical' ? 'text-red-500' : 'text-green-500'}`}>
-                    {currentDept?.status === 'critical' ? t.critical : t.clean}
-                  </span>
+                <div className={`p-6 rounded-2xl border-2 transition-all ${currentDept?.status === 'critical' ? 'bg-red-950/20 border-red-600/30' : 'bg-slate-900/50 border-slate-700'}`}>
+                  <span className="text-[10px] font-bold uppercase block mb-3 text-slate-500 tracking-widest mono">{t.status}</span>
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${currentDept?.status === 'critical' ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white'}`}>
+                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          {currentDept?.status === 'critical' ? 
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /> :
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                          }
+                       </svg>
+                    </div>
+                    <span className={`text-sm font-black uppercase tracking-tight ${currentDept?.status === 'critical' ? 'text-red-500' : 'text-emerald-500'}`}>
+                      {currentDept?.status === 'critical' ? t.critical : t.clean}
+                    </span>
+                  </div>
                 </div>
              </div>
           </div>
 
-          <div className="bento-card p-4 opacity-30">
-             <h4 className="text-[8px] md:text-[9px] font-black uppercase mb-1 mono">_GEO_LINK</h4>
-             <p className="text-[8px] md:text-[9px] mono leading-tight truncate">
-               &gt; {selectedDept.toUpperCase().replace(' ', '_')}<br/>
-               &gt; HASH: {Math.random().toString(16).slice(2, 8).toUpperCase()}
-             </p>
+          <div className="bento-card p-6 bg-slate-900/20 border-dashed">
+             <div className="flex items-center gap-3 mb-4">
+                <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                <h4 className="text-[10px] font-black uppercase text-slate-500 mono tracking-widest">Metadata Secure Link</h4>
+             </div>
+             <div className="mono text-[10px] text-slate-500 space-y-1">
+               <p>&gt; DEPT_URI: {selectedDept.toUpperCase().replace(' ', '_')}</p>
+               <p>&gt; TRACE_HASH: {Math.random().toString(16).slice(2, 10).toUpperCase()}</p>
+             </div>
           </div>
         </div>
       </div>
