@@ -57,17 +57,18 @@ const CitizenView: React.FC<CitizenViewProps> = ({ lang, data, selectedDept, set
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-6 gap-8 pb-12">
-      <div className="md:col-span-4 bento-card p-10 flex flex-col min-h-[500px]">
-        <div className="flex justify-between items-start mb-12">
-          <h2 className="text-3xl font-black uppercase tracking-tighter">{selectedDept.toUpperCase()}</h2>
-          <button onClick={() => setSelectedDept("Nivel Nacional")} className={`px-6 py-2 rounded-xl text-[9px] font-black border transition-all ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-black/5 border-black/5 hover:bg-black/10'}`}>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 lg:gap-8 pb-12">
+      {/* Mapa Principal - Mayor presencia en tablets */}
+      <div className="md:col-span-2 lg:col-span-4 bento-card p-6 md:p-10 flex flex-col min-h-[450px] md:min-h-[550px]">
+        <div className="flex justify-between items-start mb-8 md:mb-12">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tighter">{selectedDept.toUpperCase()}</h2>
+          <button onClick={() => setSelectedDept("Nivel Nacional")} className={`px-5 md:px-6 py-2 rounded-xl text-[9px] md:text-[10px] font-black border transition-all ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-black/5 border-black/5 hover:bg-black/10'}`}>
             {t.national}
           </button>
         </div>
 
         <div className="flex-grow flex items-center justify-center">
-          <svg viewBox="0 0 1000 600" className="w-full h-full max-h-[400px]">
+          <svg viewBox="0 0 1000 600" className="w-full h-full max-h-[350px] md:max-h-[450px]">
             {HONDURAS_PATHS.map((path) => {
               const dData = data?.departments.find(d => d.name === path.name);
               const isActive = selectedDept === path.name;
@@ -90,94 +91,98 @@ const CitizenView: React.FC<CitizenViewProps> = ({ lang, data, selectedDept, set
         </div>
       </div>
 
-      <div className="md:col-span-2 space-y-6">
-        <div className="bento-card p-8 text-center flex flex-col justify-center">
-          <p className="text-[9px] font-black opacity-40 uppercase mb-2">{t.processed}</p>
+      {/* Métricas Globales Lateral */}
+      <div className="md:col-span-2 lg:col-span-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
+        <div className="bento-card p-6 md:p-8 text-center flex flex-col justify-center">
+          <p className="text-[9px] md:text-[10px] font-black opacity-40 uppercase mb-2 tracking-widest">{t.processed}</p>
           <div className="flex justify-center items-baseline gap-2">
-            <span className="text-6xl font-black mono tracking-tighter">{currentDept ? currentDept.processed : data?.global.processedPercent}%</span>
+            <span className="text-5xl md:text-6xl lg:text-7xl font-black mono tracking-tighter">{currentDept ? currentDept.processed : data?.global.processedPercent}%</span>
           </div>
         </div>
-        <div className="bento-card p-8 text-center flex flex-col justify-center">
-          <p className="text-[9px] font-black opacity-40 uppercase mb-2">{t.participation}</p>
+        <div className="bento-card p-6 md:p-8 text-center flex flex-col justify-center">
+          <p className="text-[9px] md:text-[10px] font-black opacity-40 uppercase mb-2 tracking-widest">{t.participation}</p>
           <div className="flex justify-center items-baseline gap-2">
-            <span className="text-6xl font-black mono tracking-tighter">{currentDept ? currentDept.participation : data?.global.participationPercent}%</span>
+            <span className="text-5xl md:text-6xl lg:text-7xl font-black mono tracking-tighter">{currentDept ? currentDept.participation : data?.global.participationPercent}%</span>
           </div>
         </div>
         
-        <div className="bento-card p-8 text-center flex flex-col justify-center">
+        <div className="md:col-span-2 lg:col-span-1 bento-card p-6 md:p-8 text-center flex flex-col justify-center">
           <div className="flex justify-between items-center mb-4 px-2">
-             <p className="text-[9px] font-black opacity-40 uppercase">{t.health}</p>
-             <span className="text-[8px] font-black px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded uppercase tracking-widest">{t.status}</span>
+             <p className="text-[9px] md:text-[10px] font-black opacity-40 uppercase tracking-widest">{t.health}</p>
+             <span className="text-[8px] md:text-[9px] font-black px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded uppercase tracking-[0.2em]">{t.status}</span>
           </div>
           <div className="space-y-3">
-            <div className={`p-4 rounded-2xl mono text-[10px] break-all leading-relaxed ${isDark ? 'bg-black/40 text-emerald-400' : 'bg-zinc-100 text-emerald-600 shadow-inner'}`}>
+            <div className={`p-4 rounded-2xl mono text-[10px] md:text-[11px] break-all leading-relaxed ${isDark ? 'bg-black/40 text-emerald-400' : 'bg-zinc-100 text-emerald-600 shadow-inner'}`}>
                {latestProtocol?.hash}
             </div>
           </div>
         </div>
       </div>
 
-      {data?.candidates.map(c => {
-        const isExpanded = expandedCandidate === c.id;
-        return (
-          <div 
-            key={c.id} 
-            onClick={() => setExpandedCandidate(isExpanded ? null : c.id)}
-            className={`md:col-span-2 bento-card p-8 flex flex-col justify-between cursor-pointer transition-all duration-500 ${isExpanded ? 'ring-2 ring-blue-500 scale-[1.02] shadow-2xl' : ''}`}
-          >
-            <div>
-              <div className="flex justify-between items-start mb-4">
-                <span className="text-[9px] font-black opacity-40 uppercase">{c.party}</span>
-                <div className="w-3.5 h-3.5 rounded-full shadow-lg" style={{ backgroundColor: c.color }}></div>
-              </div>
-              <h4 className="text-lg font-black tracking-tight uppercase">{c.name}</h4>
-            </div>
-            
-            <div className="mt-8">
-              <div className="flex justify-between items-end mb-4">
-                <div className="flex flex-col">
-                  <span className="text-[54px] font-black mono leading-none tracking-tighter" style={{ color: c.color }}>{(c.votes / totalVotes * 100).toFixed(1)}%</span>
+      {/* Candidatos - Grid Adaptativo para tablets (2 cols) y desktop (3 cols) */}
+      <div className="md:col-span-2 lg:col-span-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        {data?.candidates.map(c => {
+          const isExpanded = expandedCandidate === c.id;
+          return (
+            <div 
+              key={c.id} 
+              onClick={() => setExpandedCandidate(isExpanded ? null : c.id)}
+              className={`bento-card p-6 md:p-8 flex flex-col justify-between cursor-pointer transition-all duration-500 ${isExpanded ? 'ring-2 ring-blue-500 scale-[1.01] shadow-2xl md:col-span-2 lg:col-span-1' : ''}`}
+            >
+              <div>
+                <div className="flex justify-between items-start mb-4">
+                  <span className="text-[9px] md:text-[10px] font-black opacity-40 uppercase tracking-widest">{c.party}</span>
+                  <div className="w-3.5 h-3.5 md:w-4 md:h-4 rounded-full shadow-lg" style={{ backgroundColor: c.color }}></div>
                 </div>
-                <div className="flex flex-col items-end gap-1.5">
-                  <div className="flex items-baseline gap-1">
-                     <span className="text-[10px] font-bold opacity-30 uppercase tracking-tight">{t.winProb}:</span>
-                     <span className="text-[11px] font-black mono tabular-nums uppercase" style={{ color: c.color }}>{getWinProb(c.id)}</span>
-                  </div>
-                  <span className="text-[11px] font-bold opacity-30 tabular-nums uppercase mono">{c.votes.toLocaleString()} {t.votes}</span>
-                </div>
+                <h4 className="text-lg md:text-xl font-black tracking-tight uppercase">{c.name}</h4>
               </div>
-              <div className="h-2 w-full bg-zinc-500/10 rounded-full overflow-hidden mb-4">
-                <div className="h-full transition-all duration-1000" style={{ width: `${(c.votes / totalVotes * 100)}%`, backgroundColor: c.color }}></div>
-              </div>
-
-              {isExpanded && (
-                <div className="pt-5 border-t border-zinc-500/10 animate-in fade-in slide-in-from-top-3 duration-500 space-y-4">
-                   <div className="flex justify-between items-center">
-                      <span className="text-[9px] font-black opacity-40 uppercase tracking-widest">Salud de Cuota (Sigma)</span>
-                      <span className="text-[10px] font-black mono text-emerald-500">NOMINAL</span>
-                   </div>
-                   <div className="flex gap-1.5">
-                      {Array.from({length: 10}).map((_, i) => (
-                        <div key={i} className={`h-1.5 flex-1 rounded-full ${i < 8 ? 'bg-blue-500' : 'bg-zinc-500/10'}`}></div>
-                      ))}
-                   </div>
-                   <p className="text-[10px] font-bold opacity-60 leading-snug">
-                     {lang === 'ES' 
-                       ? "Análisis de flujo verificado. No se detectan picos de carga automatizada en este candidato." 
-                       : "Flow analysis verified. No automated load spikes detected for this candidate."}
-                   </p>
-                </div>
-              )}
               
-              {!isExpanded && (
-                <div className="flex justify-center pt-2">
-                  <span className="text-[8px] font-black opacity-20 uppercase tracking-[0.3em]">{t.details}</span>
+              <div className="mt-6 md:mt-10">
+                <div className="flex justify-between items-end mb-4">
+                  <div className="flex flex-col">
+                    <span className="text-5xl md:text-6xl font-black mono leading-none tracking-tighter" style={{ color: c.color }}>{(c.votes / totalVotes * 100).toFixed(1)}%</span>
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <div className="flex items-baseline gap-1">
+                       <span className="text-[10px] md:text-[11px] font-bold opacity-30 uppercase tracking-tight">{t.winProb}:</span>
+                       <span className="text-[11px] md:text-[12px] font-black mono tabular-nums uppercase" style={{ color: c.color }}>{getWinProb(c.id)}</span>
+                    </div>
+                    <span className="text-[11px] md:text-[12px] font-bold opacity-30 tabular-nums uppercase mono">{c.votes.toLocaleString()} {t.votes}</span>
+                  </div>
                 </div>
-              )}
+                <div className="h-2 w-full bg-zinc-500/10 rounded-full overflow-hidden mb-4">
+                  <div className="h-full transition-all duration-1000" style={{ width: `${(c.votes / totalVotes * 100)}%`, backgroundColor: c.color }}></div>
+                </div>
+
+                {isExpanded && (
+                  <div className="pt-5 border-t border-zinc-500/10 animate-in fade-in slide-in-from-top-3 duration-500 space-y-4">
+                     <div className="flex justify-between items-center">
+                        <span className="text-[9px] md:text-[10px] font-black opacity-40 uppercase tracking-widest">Salud de Cuota (Sigma)</span>
+                        <span className="text-[10px] md:text-[11px] font-black mono text-emerald-500">NOMINAL</span>
+                     </div>
+                     <div className="flex gap-1.5">
+                        {Array.from({length: 10}).map((_, i) => (
+                          <div key={i} className={`h-1.5 flex-1 rounded-full ${i < 8 ? 'bg-blue-500' : 'bg-zinc-500/10'}`}></div>
+                        ))}
+                     </div>
+                     <p className="text-[10px] md:text-[11px] font-bold opacity-60 leading-snug">
+                       {lang === 'ES' 
+                         ? "Análisis de flujo verificado. No se detectan picos de carga automatizada en este candidato." 
+                         : "Flow analysis verified. No automated load spikes detected for this candidate."}
+                     </p>
+                  </div>
+                )}
+                
+                {!isExpanded && (
+                  <div className="flex justify-center pt-2">
+                    <span className="text-[8px] md:text-[9px] font-black opacity-20 uppercase tracking-[0.3em]">{t.details}</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 };
