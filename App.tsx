@@ -6,12 +6,13 @@ import AuditorView from './components/AuditorView';
 import SystemView from './components/SystemView';
 import Timeline from './components/Timeline';
 import IntegrityMonitor from './components/IntegrityMonitor';
-import { Language, ViewMode, Theme, Protocol, ElectionData } from './types';
+import { Language, ViewMode, Theme, Protocol } from './types';
 import { useElectionData } from './hooks/useElectionData';
 
 const App: React.FC = () => {
   const [lang, setLang] = useState<Language>('ES');
   const [view, setView] = useState<ViewMode>('citizen');
+  // Ajuste de clase mundial: El modo 'light' es ahora el predeterminado para máxima claridad
   const [theme, setTheme] = useState<Theme>('light');
   const [accessibilityMode, setAccessibilityMode] = useState<'none' | 'protanopia' | 'deuteranopia' | 'tritanopia' | 'high-contrast'>('none');
   const [selectedDept, setSelectedDept] = useState<string>("Nivel Nacional");
@@ -19,7 +20,7 @@ const App: React.FC = () => {
   const [targetProtocol, setTargetProtocol] = useState<Protocol | null>(null);
   const [auditorSubTab, setAuditorSubTab] = useState<'stats' | 'dispersion' | 'alerts' | 'ledger'>('stats');
   
-  const { data, loading, error } = useElectionData();
+  const { data, loading } = useElectionData();
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -27,37 +28,26 @@ const App: React.FC = () => {
     root.classList.add(`${theme}-theme`);
   }, [theme]);
 
-  // Lógica de reconstrucción de estado basada en los 96 archivos
   const filteredData = useMemo(() => {
-    if (!data || !data.history || data.history.length === 0) return data;
-
+    if (!data) return null;
     const historyCount = data.history.length;
-    // Mapeo preciso: el cursor 0-100 se convierte en índice 0 a (N-1)
-    const index = Math.min(
-      Math.floor((timeCursor / 100) * historyCount),
-      historyCount - 1
-    );
-    
-    const historySlice = data.history.slice(0, index + 1);
-    const currentPoint = data.history[index];
-    
-    // El progreso se basa en la posición del archivo dentro de la serie de 96
-    const progressFactor = (index + 1) / historyCount;
+    const limitIndex = Math.max(1, Math.floor((timeCursor / 100) * historyCount));
+    const historySlice = data.history.slice(0, limitIndex);
+    const lastPoint = historySlice[historySlice.length - 1];
     
     return {
       ...data,
       candidates: data.candidates.map(c => ({
         ...c,
-        votes: typeof currentPoint[c.id] === 'number' ? (currentPoint[c.id] as number) : 0,
+        votes: (lastPoint[c.id] as number) || 0,
       })),
       history: historySlice,
       global: {
         ...data.global,
-        processedPercent: Number((data.global.processedPercent * progressFactor).toFixed(2)),
-        participationPercent: currentPoint.participation ? Number(currentPoint.participation) : data.global.participationPercent,
-        trend: `AUDITANDO ARCHIVO ${index + 1} / ${historyCount} (${currentPoint.time})`
+        processedPercent: Number((data.global.processedPercent * (timeCursor / 100)).toFixed(1)),
+        participationPercent: Number((data.global.participationPercent * (timeCursor / 100)).toFixed(1))
       }
-    } as ElectionData;
+    };
   }, [data, timeCursor]);
 
   const handleAlertJump = (protocol: Protocol) => {
@@ -68,12 +58,14 @@ const App: React.FC = () => {
   };
 
   const t = {
-    ES: { citizen: "CIUDADANO", auditor: "AUDITOR", ethos: "ETHOS", loading: "SINCRONIZANDO...", error: "ERROR DE DATOS" },
-    EN: { citizen: "CITIZEN", auditor: "AUDITOR", ethos: "ETHOS", loading: "SYNCING...", error: "DATA ERROR" }
+    ES: { citizen: "CIUDADANO", auditor: "AUDITOR", ethos: "ETHOS", loading: "SINCRONIZANDO..." },
+    EN: { citizen: "CITIZEN", auditor: "AUDITOR", ethos: "ETHOS", loading: "SYNCING..." }
   }[lang];
 
+  const isDark = theme === 'dark';
+
   return (
-    <div className={`min-h-screen flex flex-col transition-all duration-700 pb-64 ${theme === 'dark' ? 'bg-black text-white' : 'bg-[#f5f5f7] text-[#1d1d1f]'}`}>
+    <div className={`min-h-screen flex flex-col transition-all duration-700 pb-64 ${isDark ? 'bg-black text-white' : 'bg-[#f5f5f7] text-[#1d1d1f]'}`}>
       <Header 
         lang={lang} setLang={setLang}
         theme={theme} setTheme={setTheme}
@@ -82,12 +74,12 @@ const App: React.FC = () => {
         data={filteredData}
       />
       
-      <main className="flex-grow px-4 sm:px-8 md:px-12 lg:px-16 pt-24 md:pt-32 max-w-[1800px] mx-auto w-full">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
+      <main className="flex-grow px-4 sm:px-8 md:px-12 lg:px-16 pt-24 md:pt-32 max-w-[1800px] mx-auto w-full overflow-x-hidden">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8 md:mb-16 gap-6">
           <IntegrityMonitor lang={lang} data={filteredData} loading={loading} theme={theme} colorBlindMode={accessibilityMode !== 'none'} />
           
-          <div className={`flex p-1 rounded-full border transition-all ${theme === 'dark' ? 'bg-zinc-900/50 border-white/5' : 'bg-white border-black/5'}`}>
-            <div className="flex">
+          <div className={`flex w-full md:w-auto p-1 rounded-full border transition-all duration-500 ${isDark ? 'bg-zinc-900/50 border-white/5 shadow-inner' : 'bg-white border-black/5 shadow-sm'}`}>
+            <div className="flex w-full md:w-auto overflow-x-auto no-scrollbar touch-pan-x">
               {[
                 { id: 'citizen', label: t.citizen },
                 { id: 'auditor', label: t.auditor },
@@ -96,10 +88,10 @@ const App: React.FC = () => {
                 <button 
                   key={btn.id}
                   onClick={() => setView(btn.id as ViewMode)} 
-                  className={`px-8 py-3 text-[10px] font-black tracking-widest rounded-full transition-all ${
+                  className={`flex-1 md:flex-none px-6 md:px-12 lg:px-14 py-3 md:py-4 text-[9px] md:text-[10px] lg:text-[11px] font-black tracking-widest rounded-full transition-all duration-300 whitespace-nowrap ${
                     view === btn.id 
-                      ? 'bg-blue-600 text-white shadow-lg' 
-                      : 'text-zinc-400 hover:text-zinc-600'
+                      ? (isDark ? 'bg-blue-600/15 text-blue-400 border border-blue-500/30 shadow-[0_0_15px_rgba(37,99,235,0.15)]' : 'bg-blue-600/10 text-blue-600 border border-blue-500/20 shadow-sm') 
+                      : (isDark ? 'text-zinc-500 hover:text-zinc-300 border border-transparent' : 'text-zinc-400 hover:text-zinc-900 border border-transparent')
                   }`}
                 >
                   {btn.label}
@@ -109,16 +101,10 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {error && (
-          <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-center">
-            <p className="text-red-500 text-[10px] font-black tracking-widest uppercase">{t.error}: {error}</p>
-          </div>
-        )}
-
-        {loading && !data ? (
+        {loading && !filteredData ? (
           <div className="h-[50vh] flex flex-col items-center justify-center">
              <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-6"></div>
-             <span className="text-[10px] font-black tracking-[0.5em] opacity-30 uppercase">{t.loading}</span>
+             <span className="text-[10px] font-black tracking-[0.5em] opacity-30">{t.loading}</span>
           </div>
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
